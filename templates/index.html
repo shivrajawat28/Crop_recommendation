@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CropWise ANN Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">ANN crop recommendation</p>
+          <h1>CropWise</h1>
+          <p class="lede">Enter soil nutrients and weather readings to predict the most suitable crop with confidence.</p>
+        </div>
+        <div class="accuracy-pill">
+          <span>Model accuracy</span>
+          <strong>{{ model_accuracy }}%</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form class="input-panel" method="post" action="/predict">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Field inputs</p>
+              <h2>Soil and climate</h2>
+            </div>
+            <button class="submit-icon" type="submit" aria-label="Predict crop" title="Predict crop">
+              <span>Predict</span>
+            </button>
+          </div>
+
+          <div class="grid">
+            {% for field in fields %}
+            <label class="field" for="{{ field.name }}">
+              <span>
+                {{ field.label }}
+                <small>{{ field.unit }}</small>
+              </span>
+              <input
+                id="{{ field.name }}"
+                name="{{ field.name }}"
+                type="number"
+                min="{{ field.min }}"
+                max="{{ field.max }}"
+                step="{{ field.step }}"
+                placeholder="{{ field.placeholder }}"
+                value="{{ values.get(field.name, '') }}"
+                required
+              />
+            </label>
+            {% endfor %}
+          </div>
+        </form>
+
+        <aside class="result-panel {% if result %}flash{% endif %}">
+          {% if result %}
+          <p class="eyebrow">Recommended crop</p>
+          <div class="crop-name">{{ result.crop }}</div>
+          <div class="confidence">
+            <span>Confidence</span>
+            <strong>{{ result.confidence }}%</strong>
+          </div>
+          <div class="meter" aria-label="Confidence meter">
+            <span style="width: {{ result.confidence }}%"></span>
+          </div>
+          <div class="alternatives">
+            <p>Top predictions</p>
+            {% for item in result.top_predictions %}
+            <div class="alt-row">
+              <span>{{ item.crop }}</span>
+              <strong>{{ item.confidence }}%</strong>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="eyebrow">Prediction output</p>
+          <div class="empty-state">
+            <h2>Ready when your readings are.</h2>
+            <p>The crop name and confidence will flash here after prediction.</p>
+          </div>
+          {% endif %}
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>
